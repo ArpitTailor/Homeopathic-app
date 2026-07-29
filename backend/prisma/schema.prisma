@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_FAILED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      Role     @default(USER)
+  addresses Json?
+  orders    Order[]
+  reviews   Review[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id                   String      @id @default(uuid())
+  name                 String
+  slug                 String      @unique
+  description          String      @db.Text
+  ingredients          String      @db.Text
+  dosageInstructions   String      @db.Text
+  price                Decimal     @db.Decimal(10, 2)
+  stockCount           Int         @default(0)
+  requiresPrescription Boolean     @default(false)
+  images               Json        // Array of URLs
+  isFeatured           Boolean     @default(false)
+  isBestSeller         Boolean     @default(false)
+  
+  categoryId           String
+  category             Category    @relation(fields: [categoryId], references: [id])
+  
+  orderItems           OrderItem[]
+  reviews              Review[]
+  
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+}
+
+model Order {
+  id                  String      @id @default(uuid())
+  userId              String
+  user                User        @relation(fields: [userId], references: [id])
+  status              OrderStatus @default(PENDING)
+  totalAmount         Decimal     @db.Decimal(10, 2)
+  discountAmount      Decimal     @default(0) @db.Decimal(10, 2)
+  
+  paymentMethod       String
+  razorpayOrderId     String?
+  razorpayPaymentId   String?
+  
+  prescriptionUrl     String?
+  shippingAddress     Json
+  
+  couponId            String?
+  coupon              Coupon?     @relation(fields: [couponId], references: [id])
+  
+  orderItems          OrderItem[]
+  
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int
+  priceAtPurchase Decimal  @db.Decimal(10, 2)
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  rating     Int
+  comment    String?  @db.Text
+  isApproved Boolean  @default(false)
+  
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Coupon {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  type          DiscountType
+  discountValue Decimal      @db.Decimal(10, 2)
+  minOrderValue Decimal      @default(0) @db.Decimal(10, 2)
+  maxDiscount   Decimal?     @db.Decimal(10, 2)
+  expiryDate    DateTime
+  isActive      Boolean      @default(true)
+  
+  orders        Order[]
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
