@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #081c15; /* Dark forest green */
+  --color-foreground: #f3f4f6; /* Off-white text */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Brand colors - GOLDEN TOUCH */
+  --color-primary: #d4af37; /* Metallic Gold */
+  --color-primary-foreground: #081c15; /* Dark text on gold buttons */
+  
+  --color-secondary: #1b4332;
+  --color-secondary-foreground: #f3f4f6; /* White text on secondary */
+  
+  --color-accent: #fcd34d; /* Lighter gold for hover/accents */
+  --color-accent-foreground: #081c15;
+  
+  /* UI colors */
+  --color-muted: #132a20;
+  --color-muted-foreground: #9ca3af;
+  
+  --color-border: #1b4332;
+  --color-card: #122a1f; /* For elements that used to be white */
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base structural classes */
+.glass-panel {
+  background: rgba(18, 42, 31, 0.7); /* Darker glass */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(27, 67, 50, 0.5);
+}
