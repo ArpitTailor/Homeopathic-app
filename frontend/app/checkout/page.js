@@ -1,17 +1,22 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useCartStore } from '../../store/cartStore';
+import { useAuthStore } from '../../store/authStore';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-  const { cart, getCartTotal, hasPrescriptionItems } = useCartStore();
+  const router = useRouter();
+  const { cart, getCartTotal, hasPrescriptionItems, clearCart } = useCartStore();
+  const { user, token, hydrate } = useAuthStore();
   const [step, setStep] = useState(1);
   const [isClient, setIsClient] = useState(false);
 
   // Hydration fix for zustand
   useEffect(() => {
+    hydrate();
     setIsClient(true);
-  }, []);
+  }, [hydrate]);
 
   const [shippingAddress, setShippingAddress] = useState({
     fullName: '',
@@ -28,7 +33,40 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
   if (!isClient) return null;
+
+  if (!user) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center">
+        <h2 className="text-3xl font-bold text-foreground mb-4">Please Sign In</h2>
+        <p className="text-muted-foreground mb-8">You must be logged in to proceed to checkout.</p>
+        <Link href="/login" className="bg-primary text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
+          Sign In
+        </Link>
+      </div>
+    );
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500/20 text-green-500 rounded-full mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-3xl font-bold text-foreground mb-4">Order Placed Successfully!</h2>
+        <p className="text-muted-foreground mb-8">Thank you for your purchase. We will process your order soon.</p>
+        <Link href="/products" className="bg-primary text-primary-foreground px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all">
+          Continue Shopping
+        </Link>
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -65,9 +103,55 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
-    // In a real app, integrate Razorpay SDK or direct to success page for COD
-    alert(`Order Placed Successfully via ${paymentMethod}! Redirecting...`);
-    // clearCart() & redirect
+    setIsSubmitting(true);
+    setError(null);
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    
+    // Prepare items
+    const items = cart.map(item => ({
+      productId: item.id,
+      quantity: item.quantity
+    }));
+
+    try {
+      const res = await fetch(`${API_URL}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items,
+          paymentMethod,
+          shippingAddress,
+          couponCode: discount > 0 ? couponCode : undefined
+        })
+      });
+
+      const contentType = res.headers.get("content-type");
+      let data;
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        data = await res.json();
+      } else {
+        data = { message: 'Server returned an unexpected response' };
+      }
+
+      if (!res.ok) {
+        if (data.message && data.message.includes('old items in your cart')) {
+          clearCart();
+          throw new Error(data.message + ' We have cleared it for you. Please refresh and add products again.');
+        }
+        throw new Error(data.message || 'Failed to place order');
+      }
+
+      clearCart();
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,29 +183,29 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
-                    <input required type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                    <input required type="text" value={shippingAddress.fullName} onChange={(e) => setShippingAddress({...shippingAddress, fullName: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Phone Number</label>
-                    <input required type="tel" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                    <input required type="tel" value={shippingAddress.phone} onChange={(e) => setShippingAddress({...shippingAddress, phone: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">Address Line 1</label>
-                  <input required type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                  <input required type="text" value={shippingAddress.addressLine1} onChange={(e) => setShippingAddress({...shippingAddress, addressLine1: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div className="col-span-2 md:col-span-1">
                     <label className="block text-sm font-medium text-foreground mb-2">City</label>
-                    <input required type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                    <input required type="text" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">State</label>
-                    <input required type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                    <input required type="text" value={shippingAddress.state} onChange={(e) => setShippingAddress({...shippingAddress, state: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">ZIP Code</label>
-                    <input required type="text" className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
+                    <input required type="text" value={shippingAddress.zipCode} onChange={(e) => setShippingAddress({...shippingAddress, zipCode: e.target.value})} className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary/50" />
                   </div>
                 </div>
 
@@ -202,10 +286,16 @@ export default function CheckoutPage() {
                 <p className="text-muted-foreground">{paymentMethod === 'RAZORPAY' ? 'Online Payment (Razorpay)' : 'Cash on Delivery (COD)'}</p>
               </div>
 
+              {error && (
+                <div className="mb-8 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-500 font-medium">
+                  {error}
+                </div>
+              )}
+
               <div className="flex justify-between mt-8">
                 <button onClick={() => setStep(2)} className="px-6 py-3 border border-border text-foreground rounded-full hover:bg-muted transition-colors font-medium">Back</button>
-                <button onClick={handlePlaceOrder} className="bg-primary text-primary-foreground px-12 py-3 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
-                  Place Order
+                <button disabled={isSubmitting} onClick={handlePlaceOrder} className="bg-primary text-primary-foreground px-12 py-3 rounded-full font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50">
+                  {isSubmitting ? 'Processing...' : 'Place Order'}
                 </button>
               </div>
             </div>

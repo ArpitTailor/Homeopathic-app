@@ -15,13 +15,22 @@ exports.createOrder = async (req, res) => {
     const orderItemsData = [];
 
     for (const item of items) {
-      const product = await prisma.product.findUnique({ where: { id: item.productId } });
+      if (typeof item.productId !== 'string') {
+        return res.status(400).json({ 
+          message: 'It seems you have old items in your cart. Please clear your cart and add the items again.' 
+        });
+      }
+      const product = await prisma.product.findUnique({
+        where: {
+          id: item.productId
+        }
+      });
       
       if (!product) {
-        return res.status(404).json({ message: `Product ${item.productId} not found` });
+        return res.status(404).json({ message: `Product not found: ${item.productId}` });
       }
 
-      if (product.stockCount < item.quantity) {
+      if (product.stock < item.quantity) {
         return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
       }
 
@@ -93,7 +102,7 @@ exports.createOrder = async (req, res) => {
     for (const item of items) {
       await prisma.product.update({
         where: { id: item.productId },
-        data: { stockCount: { decrement: item.quantity } }
+        data: { stock: { decrement: item.quantity } }
       });
     }
 
@@ -138,6 +147,43 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(200).json({ message: 'Order status updated', order });
   } catch (error) {
     console.error('Update Order Status Error:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Track an order (Public)
+exports.trackOrder = async (req, res) => {
+  try {
+    const { orderId, email } = req.body;
+
+    if (!orderId || !email) {
+      return res.status(400).json({ message: 'Order ID and Email are required' });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: { select: { email: true } },
+        orderItems: {
+          include: { product: { select: { name: true } } }
+        }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found. Please check your Order ID.' });
+    }
+
+    if (order.user.email.toLowerCase() !== email.toLowerCase()) {
+      return res.status(403).json({ message: 'Email does not match the order records.' });
+    }
+
+    res.status(200).json({ order });
+  } catch (error) {
+    console.error('Track Order Error:', error);
+    if (error.code === 'P2023' || error.message.includes('ObjectID')) {
+      return res.status(400).json({ message: 'Invalid Order ID format' });
+    }
     res.status(500).json({ message: 'Server Error' });
   }
 };

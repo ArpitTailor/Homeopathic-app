@@ -32,8 +32,9 @@ export default function ShippingReturnsPage() {
               <li><strong>Standard Shipping (Below ₹499):</strong> Flat rate of ₹50.</li>
               <li><strong>Express Shipping:</strong> ₹100 flat rate. (Delivery in 1-2 business days in metro cities)</li>
             </ul>
-            <p className="mt-4">
-              <Link href="/track-order" className="text-primary hover:underline font-medium">Track your order here</Link> once it has shipped.
+            <p className="text-muted-foreground mt-4 leading-relaxed">
+              You will receive an email confirmation containing your tracking number once your order has shipped. 
+              You can also <Link href="/orders" className="text-primary hover:underline font-medium">view your orders here</Link> directly.
             </p>
           </div>
         </section>

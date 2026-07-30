@@ -3,6 +3,9 @@ const router = express.Router();
 const orderController = require('../controllers/order.controller');
 const { authMiddleware, adminMiddleware } = require('../middlewares/auth.middleware');
 
+// Public routes
+router.post('/track', orderController.trackOrder);
+
 // Protected User routes
 router.post('/', authMiddleware, orderController.createOrder);
 router.get('/me', authMiddleware, orderController.getMyOrders);

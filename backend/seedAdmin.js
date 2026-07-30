@@ -18,20 +18,29 @@ async function main() {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(adminPassword, salt);
 
-  const admin = await prisma.user.upsert({
+  let admin = await prisma.user.findUnique({
     where: { email: adminEmail },
-    update: {
-      password: hashedPassword,
-      role: 'ADMIN',
-    },
-    create: {
-      name: 'Super Admin',
-      email: adminEmail,
-      password: hashedPassword,
-      phone: '0000000000',
-      role: 'ADMIN',
-    },
   });
+
+  if (admin) {
+    admin = await prisma.user.update({
+      where: { email: adminEmail },
+      data: {
+        password: hashedPassword,
+        role: 'ADMIN',
+      },
+    });
+  } else {
+    admin = await prisma.user.create({
+      data: {
+        name: 'Super Admin',
+        email: adminEmail,
+        password: hashedPassword,
+        phone: '0000000000',
+        role: 'ADMIN',
+      },
+    });
+  }
 
   console.log(`Successfully seeded Admin user: ${admin.email}`);
 }

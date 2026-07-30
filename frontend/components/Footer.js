@@ -38,9 +38,9 @@ export default function Footer() {
               <div className="mt-12 md:mt-0">
                 <h3 className="text-sm font-semibold text-white tracking-wider uppercase">Support</h3>
                 <ul role="list" className="mt-4 space-y-4">
-                  <li><Link href="/track-order" className="text-base text-gray-400 hover:text-white transition-colors">Track Order</Link></li>
+                  <li><Link href="/orders" className="text-base text-gray-400 hover:text-white transition-colors">My Orders</Link></li>
                   <li><Link href="/shipping-returns" className="text-base text-gray-400 hover:text-white transition-colors">Shipping & Returns</Link></li>
-                  <li><Link href="/contact" className="text-base text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
+                  <li><Link href="/faq" className="text-base text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
                   <li><Link href="/contact" className="text-base text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
                 </ul>
               </div>

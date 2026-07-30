@@ -90,8 +90,7 @@ async function main() {
   
   // Bulk insert using createMany
   const result = await prisma.product.createMany({
-    data: productsToSeed,
-    skipDuplicates: true,
+    data: productsToSeed
   });
 
   console.log(`Successfully seeded ${result.count} products!`);

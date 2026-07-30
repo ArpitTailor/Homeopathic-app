@@ -1,22 +1,31 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useCartStore } from '../../store/cartStore';
 
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('popularity');
+  
+  const addToCart = useCartStore((state) => state.addToCart);
+
   
   const categories = ['All', 'Cold & Cough', 'Digestive Health', 'Skin Care', 'Beauty Serums', 'Pain Relief', 'General Wellness'];
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch('http://localhost:5000/api/products');
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/products`);
         if (!res.ok) throw new Error('Failed to fetch products');
         const data = await res.json();
         setProducts(data);
@@ -29,6 +38,11 @@ export default function ProductsPage() {
     }
     fetchProducts();
   }, []);
+
+  // Sync search query if URL changes
+  useEffect(() => {
+    setSearchQuery(initialSearch);
+  }, [initialSearch]);
 
   // Filter and sort logic
   const filteredProducts = products.filter(product => {
@@ -136,7 +150,15 @@ export default function ProductsPage() {
                     </div>
                     <div className="flex justify-between items-end mt-auto pt-4 border-t border-border">
                       <span className="text-xl font-extrabold text-foreground">₹{product.price}</span>
-                      <button className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground p-2 rounded-full transition-colors">
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault(); // Stop navigation
+                          e.stopPropagation();
+                          addToCart(product);
+                          alert(`${product.name} added to cart!`);
+                        }}
+                        className="bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground p-2 rounded-full transition-colors z-10 relative"
+                      >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -150,5 +172,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-white">Loading products...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

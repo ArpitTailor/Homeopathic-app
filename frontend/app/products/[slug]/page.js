@@ -15,7 +15,8 @@ export default function ProductDetailPage({ params }) {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${slug}`);
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/products/${slug}`);
         if (!res.ok) throw new Error('Failed to fetch product');
         const data = await res.json();
         setProduct(data);
