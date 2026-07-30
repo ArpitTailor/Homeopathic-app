@@ -12,8 +12,12 @@ export default function AdminLogin() {
     // Dummy frontend auth simulation to show the concept
     if (email && password) {
       // In a real app, you would make an API call to /api/auth/login
-      // const res = await fetch('http://localhost:5000/api/auth/login', { ... })
-      // const data = await res.json();
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${API_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
       
       // Simulate success
       localStorage.setItem('adminToken', 'mock_admin_token_123');
