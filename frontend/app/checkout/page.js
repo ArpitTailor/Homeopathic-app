@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, getCartTotal, hasPrescriptionItems, clearCart } = useCartStore();
-  const { user, token, hydrate } = useAuthStore();
+  const { user, token, hydrate, logout } = useAuthStore();
   const [step, setStep] = useState(1);
   const [isClient, setIsClient] = useState(false);
 
@@ -138,6 +138,11 @@ export default function CheckoutPage() {
       }
 
       if (!res.ok) {
+        if (res.status === 401 || data.message === 'Token is not valid') {
+          logout();
+          router.push('/login');
+          throw new Error('Your session has expired. Please log in again.');
+        }
         if (data.message && data.message.includes('old items in your cart')) {
           clearCart();
           throw new Error(data.message + ' We have cleared it for you. Please refresh and add products again.');

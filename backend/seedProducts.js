@@ -55,9 +55,10 @@ function generateProducts() {
         const rating = (Math.random() * (5.0 - 3.5) + 3.5).toFixed(1); // 3.5 to 5.0
         const stock = Math.floor(Math.random() * 100) + 10;
         
-        // Create a styled placeholder URL (Dark green bg, gold text)
-        const encodedText = encodeURIComponent(base.split(' ')[0] + '\n' + potency);
-        const image = `https://placehold.co/400x600/122a1f/d4af37?text=${encodedText}`;
+        let image = '/images/dilution.png';
+        if (form === 'Globules') image = '/images/globules.png';
+        if (form === 'Tablets') image = '/images/tablets.png';
+        if (form === 'Ointment') image = '/images/ointment.png';
 
         const description = `Premium homeopathic formulation of ${name}. Highly effective for conditions related to ${category.toLowerCase()}. Manufactured using the finest grade organic ingredients according to traditional pharmacopeia standards. \n\nKey Ingredients: ${base}\nForm: ${form}\nPotency: ${potency}\n\nDirections for Use: Take as directed by a homeopathic physician. Keep out of reach of children. Store in a cool, dry place away from direct sunlight.`;
 

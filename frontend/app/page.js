@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import FeaturedProducts from '../components/FeaturedProducts';
 
 export default function Home() {
   return (
@@ -134,41 +135,7 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Product Card Skeletons/Placeholders */}
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="bg-card border border-border rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div className="w-full h-64 bg-secondary/30 relative flex items-center justify-center p-6">
-                  {/* Mock Product Bottle */}
-                  <div className="w-20 h-32 bg-card rounded-xl shadow-md border border-border flex flex-col items-center group-hover:scale-105 transition-transform duration-500">
-                    <div className="w-8 h-3 bg-primary/20 rounded-t-sm mt-0"></div>
-                    <div className="w-full h-full mt-1 border-t border-border flex items-center justify-center">
-                       <span className="text-[10px] text-muted-foreground font-bold">R&R</span>
-                    </div>
-                  </div>
-                  {item === 1 && (
-                    <span className="absolute top-4 left-4 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Best Seller</span>
-                  )}
-                </div>
-                <div className="p-6">
-                  <div className="text-xs text-muted-foreground font-medium mb-2">Category</div>
-                  <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-1">Product Name Placeholder</h3>
-                  <div className="flex items-center space-x-1 mb-4">
-                    {[1,2,3,4,5].map(star => <span key={star} className="text-yellow-400 text-sm">★</span>)}
-                    <span className="text-xs text-muted-foreground ml-2">(128)</span>
-                  </div>
-                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
-                    <span className="text-xl font-extrabold text-foreground">₹499</span>
-                    <button className="bg-primary/10 text-primary hover:bg-primary hover:text-white p-2 rounded-full transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <FeaturedProducts />
         </div>
       </section>
     </div>

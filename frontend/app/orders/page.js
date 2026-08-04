@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function MyOrdersPage() {
-  const { user, token, hydrate } = useAuthStore();
+  const router = useRouter();
+  const { user, token, hydrate, logout } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,7 +35,14 @@ export default function MyOrdersPage() {
         }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to fetch orders');
+      if (!res.ok) {
+        if (res.status === 401 || data.message === 'Token is not valid') {
+          logout();
+          router.push('/login');
+          throw new Error('Your session has expired. Please log in again.');
+        }
+        throw new Error(data.message || 'Failed to fetch orders');
+      }
       setOrders(data.orders);
     } catch (err) {
       setError(err.message);
