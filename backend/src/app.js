@@ -10,6 +10,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => {
+  res.status(200).send('Welcome to the Roots & Remedies API. The backend server is running successfully!');
+});
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Roots and Remedies API is running' });
 });
