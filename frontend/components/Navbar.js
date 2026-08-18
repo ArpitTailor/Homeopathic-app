@@ -34,6 +34,14 @@ export default function Navbar() {
 
   return (
     <nav className="static w-full bg-[#081c15] border-b border-[#1b4332]">
+      {/* Top Banner for APK Download */}
+      <div className="bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium flex justify-center items-center space-x-2 shadow-sm border-b border-primary/20 relative z-50">
+        <span className="hidden sm:inline">Get the best experience on your phone!</span>
+        <a href="/app.apk" download className="underline font-bold hover:text-white transition-colors flex items-center bg-white/20 px-3 py-1 rounded-full">
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Download APK
+        </a>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0 flex items-center">
