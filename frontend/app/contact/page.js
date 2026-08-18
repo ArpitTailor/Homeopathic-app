@@ -19,8 +19,8 @@ export default function ContactPage() {
               <h3 className="text-xl font-bold text-foreground mb-2">Our Clinic</h3>
               <p className="text-muted-foreground">
                 Roots & Remedies Care Center<br/>
-                123 Healing Avenue, Wellness Park<br/>
-                New Delhi, India 110001
+                Adarsh Megdhoot Nagar, Vijay Nagar<br/>
+                Indore, India
               </p>
             </div>
           </div>
@@ -31,8 +31,8 @@ export default function ContactPage() {
             </div>
             <div>
               <h3 className="text-xl font-bold text-foreground mb-2">Contact Details</h3>
-              <p className="text-muted-foreground mb-1">Support: +91 98765 43210</p>
-              <p className="text-muted-foreground mb-1">Consultation: +91 98765 43211</p>
+              <p className="text-muted-foreground mb-1">Support: +91 90399 25667</p>
+              <p className="text-muted-foreground mb-1">Consultation: +91 90399 25667</p>
               <p className="text-primary font-medium mt-2">support@rootsandremedies.com</p>
             </div>
           </div>
