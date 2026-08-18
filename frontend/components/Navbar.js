@@ -32,16 +32,48 @@ export default function Navbar() {
     }
   };
 
+  const [mounted, setMounted] = useState(false);
+  const [appData, setAppData] = useState({ text: 'Download App', url: '#', device: 'generic' });
+
+  useEffect(() => {
+    setMounted(true);
+    const userAgent = window.navigator.userAgent || window.navigator.vendor || window.opera;
+    if (/android/i.test(userAgent)) {
+      setAppData({ text: 'Download APK', url: '/app.apk', device: 'android' });
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+      setAppData({ text: 'Download iOS App', url: '/app.ipa', device: 'ios' });
+    } else if (/Mac/i.test(userAgent)) {
+      setAppData({ text: 'Download Mac App', url: '/app.dmg', device: 'mac' });
+    } else if (/Win/i.test(userAgent)) {
+      setAppData({ text: 'Download Windows App', url: '/app.exe', device: 'windows' });
+    } else {
+      setAppData({ text: 'Download Desktop App', url: '/app.AppImage', device: 'linux' });
+    }
+  }, []);
+
   return (
     <nav className="static w-full bg-[#081c15] border-b border-[#1b4332]">
-      {/* Top Banner for APK Download */}
-      <div className="bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium flex justify-center items-center space-x-2 shadow-sm border-b border-primary/20 relative z-50">
-        <span className="hidden sm:inline">Get the best experience on your phone!</span>
-        <a href="/app.apk" download className="underline font-bold hover:text-white transition-colors flex items-center bg-white/20 px-3 py-1 rounded-full">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Download APK
-        </a>
-      </div>
+      {/* Top Banner for OS-specific App Download */}
+      {mounted && (
+        <div className="bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium flex justify-center items-center space-x-2 shadow-sm border-b border-primary/20 relative z-50">
+          <span className="hidden sm:inline">Get the best experience on your device!</span>
+          <a href={appData.url} download className="underline font-bold hover:text-white transition-colors flex items-center bg-white/20 px-3 py-1 rounded-full">
+            {appData.device === 'android' && (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            )}
+            {appData.device === 'ios' && (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            )}
+            {(appData.device === 'windows' || appData.device === 'mac' || appData.device === 'linux') && (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            )}
+            {appData.device === 'generic' && (
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            )}
+            {appData.text}
+          </a>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0 flex items-center">
